@@ -196,16 +196,6 @@ spk-saw/
 
 ---
 
-## 🧑‍💻 Author
-
-**Ade Nova Wiguna**  
-💼 Frontend Developer  
-☕ Code + Coffee = ❤️  
-📧 Email: adenovawiguna@gmail.com  
-🌐 GitHub: [@NovaaaLv](https://github.com/NovaaaLv)
-
----
-
 ## 📜 Lisensi
 
 Proyek ini dirilis di bawah lisensi **MIT**.  
