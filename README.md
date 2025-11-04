@@ -5,6 +5,17 @@ Contohnya digunakan untuk **pemilihan mitra kerja terbaik**, **supplier terbaik*
 
 ---
 
+## ⚠️ Penting Sebelum Memulai
+
+> **Pastikan Anda menaruh folder project ini di dalam folder `htdocs` milik XAMPP!**  
+> Contoh path yang benar:
+> ```
+> C:\xampp\htdocs\spk-saw
+> ```
+> Jika tidak, aplikasi tidak akan bisa dijalankan melalui browser (`localhost`).
+
+---
+
 ## 🚀 Fitur Utama
 
 ✅ **CRUD Alternatif**  
@@ -56,7 +67,13 @@ git clone https://github.com/username/spk-saw.git
 cd spk-saw
 ```
 
-### 2️⃣ Buat Database
+### 2️⃣ Pindahkan ke Folder XAMPP
+Pindahkan hasil clone ke:
+```
+C:\xampp\htdocs\spk-saw
+```
+
+### 3️⃣ Buat Database
 1. Buka **phpMyAdmin**
 2. Buat database baru bernama:
    ```
@@ -67,7 +84,7 @@ cd spk-saw
    database/db_dss.sql
    ```
 
-### 3️⃣ Konfigurasi Koneksi Database
+### 4️⃣ Konfigurasi Koneksi Database
 Edit file:  
 ```
 include/conn.php
@@ -80,7 +97,7 @@ $pass = "";
 $db   = "db_dss";
 ```
 
-### 4️⃣ Jalankan Aplikasi
+### 5️⃣ Jalankan Aplikasi
 Jalankan di browser:
 ```
 http://localhost/spk-saw
