@@ -1,193 +1,212 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dokumentasi SPK SAW</title>
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-  <style>
-    body {
-      background-color: #f8f9fa;
-      font-family: "Poppins", sans-serif;
-      padding: 40px;
-      line-height: 1.7;
-    }
-    h1, h2, h3 {
-      color: #0d6efd;
-      margin-top: 30px;
-    }
-    pre {
-      background-color: #222;
-      color: #eee;
-      padding: 10px 15px;
-      border-radius: 8px;
-      overflow-x: auto;
-    }
-    code {
-      background-color: #f1f1f1;
-      padding: 3px 6px;
-      border-radius: 4px;
-    }
-    .table {
-      margin-top: 10px;
-      background-color: #fff;
-    }
-    footer {
-      margin-top: 60px;
-      text-align: center;
-      color: #777;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>🧮 SPK SAW – Sistem Pendukung Keputusan</h1>
-    <p>
-      Sistem ini merupakan implementasi dari
-      <strong>Simple Additive Weighting (SAW)</strong> untuk membantu pengambilan
-      keputusan berbasis kriteria — misalnya dalam pemilihan mitra kerja terbaik,
-      supplier terbaik, atau alternatif paling unggul berdasarkan sejumlah kriteria
-      dengan bobot tertentu.
-    </p>
+# 🧮 SPK SAW – Sistem Pendukung Keputusan (Metode Simple Additive Weighting)
 
-    <hr />
+Sistem ini merupakan implementasi dari **metode Simple Additive Weighting (SAW)** untuk membantu proses pengambilan keputusan berbasis kriteria.  
+Contohnya digunakan untuk **pemilihan mitra kerja terbaik**, **supplier terbaik**, atau **alternatif terbaik** berdasarkan sejumlah kriteria dengan bobot tertentu.
 
-    <h2>🚀 Fitur Utama</h2>
-    <ul>
-      <li>CRUD Alternatif (Tambah, Edit, Hapus)</li>
-      <li>CRUD Kriteria dengan bobot dan jenis atribut (<code>benefit</code> atau <code>cost</code>)</li>
-      <li>Penilaian (Evaluasi) tiap alternatif terhadap kriteria</li>
-      <li>Perhitungan normalisasi otomatis (Matriks R)</li>
-      <li>Perhitungan nilai preferensi (V) dan perangkingan</li>
-      <li>Autodelete evaluasi saat alternatif dihapus</li>
-      <li>Validasi input dan pesan alert responsif</li>
-      <li>Login berbasis role (Admin & Alternatif)</li>
-    </ul>
+---
 
-    <h2>🧩 Teknologi yang Digunakan</h2>
-    <table class="table table-bordered">
-      <tr><th>Komponen</th><th>Teknologi</th></tr>
-      <tr><td>Backend</td><td>PHP Native</td></tr>
-      <tr><td>Database</td><td>MySQL / MariaDB</td></tr>
-      <tr><td>Frontend</td><td>HTML, CSS, Bootstrap 5</td></tr>
-      <tr><td>Server</td><td>XAMPP / Laragon</td></tr>
-      <tr><td>Metode</td><td>Simple Additive Weighting (SAW)</td></tr>
-    </table>
+## 🚀 Fitur Utama
 
-    <h2>⚙️ Instalasi</h2>
-    <h5>1️⃣ Clone Repository</h5>
-    <pre><code>git clone https://github.com/username/spk-saw.git
-cd spk-saw</code></pre>
+✅ **CRUD Alternatif**  
+Menambahkan, mengedit, dan menghapus data alternatif (misalnya nama perusahaan).
 
-    <h5>2️⃣ Buat Database</h5>
-    <ol>
-      <li>Buka phpMyAdmin</li>
-      <li>Buat database bernama <code>db_dss</code></li>
-      <li>Import file SQL: <code>database/db_dss.sql</code></li>
-    </ol>
+✅ **CRUD Kriteria**  
+Menentukan kriteria penilaian, bobot, dan jenis atribut (`benefit` atau `cost`).
 
-    <h5>3️⃣ Konfigurasi Koneksi Database</h5>
-    <pre><code>// include/conn.php
+✅ **Penilaian / Evaluasi Alternatif**  
+Memberikan nilai tiap alternatif terhadap setiap kriteria (rentang nilai 0–5).
+
+✅ **Normalisasi Otomatis (Matriks R)**  
+Sistem menghitung nilai normalisasi berdasarkan jenis atribut.
+
+✅ **Perhitungan Nilai Preferensi (V)**  
+Menampilkan hasil akhir (ranking) berdasarkan total bobot terhitung.
+
+✅ **Autodelete Evaluasi**  
+Ketika data alternatif dihapus, seluruh evaluasi terkait otomatis ikut terhapus.
+
+✅ **Validasi Input**  
+- Nilai tidak boleh lebih dari **5**.  
+- Tidak boleh memasukkan **nilai ganda** untuk kombinasi alternatif–kriteria yang sama.  
+- Menampilkan pesan notifikasi (alert) dengan warna sesuai status.
+
+✅ **Login Role-based**
+- `admin` → memiliki akses penuh.  
+- `alternatif` → akses terbatas.
+
+---
+
+## 🧩 Teknologi yang Digunakan
+
+| Komponen | Teknologi |
+|-----------|------------|
+| Backend | PHP Native |
+| Database | MySQL / MariaDB |
+| Frontend | HTML, CSS, Bootstrap 5 |
+| Server | XAMPP / Laragon |
+| Metode | Simple Additive Weighting (SAW) |
+
+---
+
+## ⚙️ Instalasi
+
+### 1️⃣ Clone Repository
+```bash
+git clone https://github.com/username/spk-saw.git
+cd spk-saw
+```
+
+### 2️⃣ Buat Database
+1. Buka **phpMyAdmin**
+2. Buat database baru bernama:
+   ```
+   db_dss
+   ```
+3. Import file SQL berikut:
+   ```
+   database/db_dss.sql
+   ```
+
+### 3️⃣ Konfigurasi Koneksi Database
+Edit file:  
+```
+include/conn.php
+```
+Sesuaikan dengan pengaturan lokal Anda:
+```php
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "db_dss";</code></pre>
+$db   = "db_dss";
+```
 
-    <h5>4️⃣ Jalankan Aplikasi</h5>
-    <pre><code>http://localhost/spk-saw</code></pre>
+### 4️⃣ Jalankan Aplikasi
+Jalankan di browser:
+```
+http://localhost/spk-saw
+```
 
-    <h2>🔑 Login Awal</h2>
-    <table class="table table-striped">
-      <tr><th>Username</th><th>Password</th><th>Role</th></tr>
-      <tr><td>admin</td><td>admin</td><td>admin</td></tr>
-      <tr><td>alternatif</td><td>12345</td><td>alternatif</td></tr>
-    </table>
+---
 
-    <h2>📊 Contoh Struktur Database</h2>
-    <h5>Tabel saw_criterias</h5>
-    <table class="table table-bordered">
-      <tr><th>id_criteria</th><th>criteria</th><th>weight</th><th>attribute</th></tr>
-      <tr><td>1</td><td>Kualitas Produk</td><td>2.5</td><td>benefit</td></tr>
-      <tr><td>2</td><td>Pelayanan Pelanggan</td><td>2.8</td><td>benefit</td></tr>
-      <tr><td>3</td><td>Inovasi Teknologi</td><td>1.5</td><td>benefit</td></tr>
-      <tr><td>4</td><td>Harga Produk</td><td>2.0</td><td>cost</td></tr>
-      <tr><td>5</td><td>Waktu Pengiriman</td><td>2.8</td><td>cost</td></tr>
-    </table>
+## 🔑 Login Awal
 
-    <h2>🧠 Alur Perhitungan SAW</h2>
-    <ol>
-      <li>
-        <strong>Membentuk Matriks Keputusan (X):</strong> Setiap alternatif dinilai
-        berdasarkan kriteria.
-      </li>
-      <li>
-        <strong>Normalisasi Matriks (R):</strong>
-        <ul>
-          <li><code>benefit</code> → Rij = Xij / max(Xij)</li>
-          <li><code>cost</code> → Rij = min(Xij) / Xij</li>
-        </ul>
-      </li>
-      <li>
-        <strong>Hitung Nilai Preferensi (V):</strong>
-        <pre><code>Vi = Σ (Rij × Wj)</code></pre>
-      </li>
-      <li>
-        <strong>Perangkingan:</strong> Alternatif dengan nilai V tertinggi menjadi
-        pilihan terbaik.
-      </li>
-    </ol>
+| Username | Password | Role |
+|-----------|-----------|------|
+| admin | admin | admin |
+| alternatif | 12345 | alternatif |
 
-    <h2>🧾 Struktur Folder</h2>
-    <pre><code>spk-saw/
+---
+
+## 📊 Contoh Struktur Database
+
+### Tabel `saw_criterias`
+| id_criteria | criteria             | weight | attribute |
+|--------------|----------------------|---------|------------|
+| 1 | Kualitas Produk | 2.5 | benefit |
+| 2 | Pelayanan Pelanggan | 2.8 | benefit |
+| 3 | Inovasi Teknologi | 1.5 | benefit |
+| 4 | Harga Produk | 2.0 | cost |
+| 5 | Waktu Pengiriman | 2.8 | cost |
+
+### Tabel `saw_alternatives`
+| id_alternative | name |
+|----------------|------|
+| 1 | PT Alpha Tech |
+| 2 | PT Beta Solusindo |
+| ... | ... |
+
+### Tabel `saw_evaluations`
+| id_alternative | id_criteria | value |
+|----------------|--------------|--------|
+| 1 | 1 | 4.5 |
+| 1 | 2 | 3.2 |
+| ... | ... | ... |
+
+---
+
+## 🧠 Alur Perhitungan SAW
+
+1️⃣ **Membentuk matriks keputusan (X)**  
+   Setiap alternatif dinilai berdasarkan setiap kriteria.
+
+2️⃣ **Normalisasi matriks (R)**  
+   - Jika atribut *benefit*:  
+     `Rij = Xij / Xmax`
+   - Jika atribut *cost*:  
+     `Rij = Xmin / Xij`
+
+3️⃣ **Hitung nilai preferensi (V)**  
+   ```
+   Vi = Σ (Rij × Wj)
+   ```
+   Di mana:  
+   - `Wj` = bobot kriteria ke-j  
+   - `Rij` = nilai normalisasi alternatif ke-i pada kriteria ke-j
+
+4️⃣ **Perangkingan**  
+   Alternatif dengan nilai `V` tertinggi menjadi pilihan terbaik.
+
+---
+
+## 🧾 Struktur Folder
+
+```
+spk-saw/
 ├── include/
-│   ├── conn.php
+│   ├── conn.php             # Koneksi database
 ├── database/
-│   └── db_dss.sql
-├── matrik.php
-├── matrik-simpan.php
-├── preferensi.php
-├── alternatif.php
-├── kriteria.php
-└── index.php</code></pre>
+│   └── db_dss.sql           # File SQL database
+├── matrik.php               # Normalisasi matriks
+├── matrik-simpan.php        # Simpan evaluasi
+├── preferensi.php           # Perhitungan nilai V
+├── alternatif.php           # CRUD Alternatif
+├── kriteria.php             # CRUD Kriteria
+└── index.php                # Halaman utama (login)
+```
 
-    <h2>💬 Validasi dan Pesan</h2>
-    <table class="table table-bordered">
-      <tr><th>Situasi</th><th>Pesan Ditampilkan</th></tr>
-      <tr><td>Nilai > 5</td><td>❌ Nilai harus di antara 0 sampai 5!</td></tr>
-      <tr><td>Data duplikat</td><td>⚠️ Data ini sudah terisi!</td></tr>
-      <tr><td>Berhasil simpan</td><td>✅ Data berhasil disimpan!</td></tr>
-      <tr><td>Kesalahan server</td><td>❌ Terjadi kesalahan [error detail]</td></tr>
-    </table>
+---
 
-    <h2>🤝 Kontribusi</h2>
-    <ol>
-      <li>Fork repository ini</li>
-      <li>Buat branch baru: <code>git checkout -b fitur-baru</code></li>
-      <li>Commit perubahan: <code>git commit -m "Menambahkan fitur baru"</code></li>
-      <li>Push: <code>git push origin fitur-baru</code></li>
-      <li>Buat Pull Request 🎉</li>
-    </ol>
+## 💬 Pesan Kesalahan dan Validasi
 
-    <h2>🧑‍💻 Author</h2>
-    <p>
-      <strong>Ade Nova Wiguna</strong><br />
-      💼 Frontend Developer<br />
-      ☕ Code + Coffee = ❤️<br />
-      📧 <a href="mailto:adenovawiguna@gmail.com">adenovawiguna@gmail.com</a><br />
-      🌐 GitHub:
-      <a href="https://github.com/NovaaaLv" target="_blank">@NovaaaLv</a>
-    </p>
+| Situasi | Pesan Ditampilkan |
+|----------|------------------|
+| Nilai > 5 | ❌ "Nilai harus di antara 0 sampai 5!" |
+| Duplikat data alternatif–kriteria | ⚠️ "Data ini sudah terisi!" |
+| Berhasil simpan data | ✅ "Data berhasil disimpan!" |
+| Gagal koneksi database | ❌ "Terjadi kesalahan: [error detail]" |
 
-    <h2>📜 Lisensi</h2>
-    <p>Proyek ini dirilis di bawah lisensi <strong>MIT</strong>. Silakan digunakan, dimodifikasi, dan dikembangkan untuk kebutuhan pembelajaran atau penelitian.</p>
+---
 
-    <footer>
-      <hr />
-      <p>© 2025 SPK SAW by Ade Nova Wiguna</p>
-    </footer>
-  </div>
-</body>
-</html>
+## 🤝 Kontribusi
+
+1. Fork repository ini  
+2. Buat branch baru:  
+   ```bash
+   git checkout -b fitur-baru
+   ```
+3. Commit perubahan:  
+   ```bash
+   git commit -m "Menambahkan fitur baru"
+   ```
+4. Push branch:  
+   ```bash
+   git push origin fitur-baru
+   ```
+5. Buat Pull Request 🎉
+
+---
+
+## 🧑‍💻 Author
+
+**Ade Nova Wiguna**  
+💼 Frontend Developer  
+☕ Code + Coffee = ❤️  
+📧 Email: adenovawiguna@gmail.com  
+🌐 GitHub: [@NovaaaLv](https://github.com/NovaaaLv)
+
+---
+
+## 📜 Lisensi
+
+Proyek ini dirilis di bawah lisensi **MIT**.  
+Silakan digunakan, dimodifikasi, dan dikembangkan untuk kebutuhan pembelajaran atau penelitian.
