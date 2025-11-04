@@ -52,7 +52,7 @@ Ketika data alternatif dihapus, seluruh evaluasi terkait otomatis ikut terhapus.
 | Komponen | Teknologi |
 |-----------|------------|
 | Backend | PHP Native |
-| Database | MySQL / MariaDB |
+| Database | MySQL |
 | Frontend | HTML, CSS, Bootstrap 5 |
 | Server | XAMPP / Laragon |
 | Metode | Simple Additive Weighting (SAW) |
@@ -162,24 +162,6 @@ http://localhost/spk-saw
 
 4️⃣ **Perangkingan**  
    Alternatif dengan nilai `V` tertinggi menjadi pilihan terbaik.
-
----
-
-## 🧾 Struktur Folder
-
-```
-spk-saw/
-├── include/
-│   ├── conn.php             # Koneksi database
-├── database/
-│   └── db_dss.sql           # File SQL database
-├── matrik.php               # Normalisasi matriks
-├── matrik-simpan.php        # Simpan evaluasi
-├── preferensi.php           # Perhitungan nilai V
-├── alternatif.php           # CRUD Alternatif
-├── kriteria.php             # CRUD Kriteria
-└── index.php                # Halaman utama (login)
-```
 
 ---
 
