@@ -10,7 +10,7 @@ Contohnya digunakan untuk **pemilihan mitra kerja terbaik**, **supplier terbaik*
 > **Pastikan Anda menaruh folder project ini di dalam folder `htdocs` milik XAMPP!**  
 > Contoh path yang benar:
 > ```
-> C:\xampp\htdocs\spk-saw
+> C:\xampp\htdocs
 > ```
 > Jika tidak, aplikasi tidak akan bisa dijalankan melalui browser (`localhost`).
 
