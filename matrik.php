@@ -174,7 +174,7 @@ require "include/conn.php";
                           if ($xij === null) {
                             $rowR[$j] = 0;
                           } else {
-                            // Terapkan rumus baru: (nilai / 5) * (bobot / 100)
+                            // Terapkan rumus : (nilai / 5) * (bobot / 100)
                             $rVal = ($xij / 5) * ($wj / 100);
 
                             // Jika atribut cost, dibalik (semakin kecil semakin baik)
@@ -213,7 +213,7 @@ require "include/conn.php";
                     </tr>
                     <?php
                     if (!empty($R)) {
-                      // Ambil bobot (tetap diambil agar konsisten, tapi tidak dikalikan lagi)
+                      // Ambil bobot 
                       $bobotQuery = $db->query("SELECT id_criteria, weight FROM saw_criterias ORDER BY id_criteria");
                       $W = [];
                       while ($row = $bobotQuery->fetch_object()) {
@@ -226,7 +226,7 @@ require "include/conn.php";
                       foreach ($R as $id => $nilaiR) {
                         $V = 0;
                         for ($j = 1; $j <= 5; $j++) {
-                          // Karena bobot sudah diterapkan di R, cukup dijumlahkan saja
+                          // dijumlahkan 
                           $V += $nilaiR[$j - 1];
                         }
                         $nilaiP[$id] = $V;
