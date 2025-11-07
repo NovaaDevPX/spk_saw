@@ -40,12 +40,20 @@ require "R.php";
                     $sql = "SELECT id_criteria, weight FROM saw_criterias ORDER BY id_criteria";
                     $result = $db->query($sql);
                     $W = array();
+                    $totalWeight = 0;
+
                     while ($row = $result->fetch_object()) {
                       $W[$row->id_criteria] = $row->weight;
+                      $totalWeight += $row->weight;
                     }
                     $result->free();
 
-                    // Hitung nilai preferensi (P) dan simpan
+                    // Konversi bobot ke proporsi (misal total 100 → jadi 0–1)
+                    foreach ($W as $key => $value) {
+                      $W[$key] = $value / $totalWeight;
+                    }
+
+                    // Hitung nilai preferensi (P)
                     $V = array();
                     foreach ($R as $id_alt => $nilai) {
                       $V[$id_alt] =
@@ -89,10 +97,10 @@ require "R.php";
                         }
 
                         echo "<tr>
-                    <td>$rank</td>
-                    <td>A$id_alt - $alt->name</td>
-                    <td>$display</td>
-                  </tr>";
+                          <td>$rank</td>
+                          <td>A$id_alt - $alt->name</td>
+                          <td>$display</td>
+                        </tr>";
                         $rank++;
                       }
                       ?>
@@ -100,12 +108,11 @@ require "R.php";
 
                   <?php
                   } else {
-                    // Jika $R kosong, tampilkan pesan
                     echo "<table class='table table-striped mb-0 mt-4'>
-            <tr>
-                <td colspan='3' class='text-center text-danger'>Belum ada data Nilai Preferensi (P).</td>
-            </tr>
-          </table>";
+                      <tr>
+                          <td colspan='3' class='text-center text-danger'>Belum ada data Nilai Preferensi (P).</td>
+                      </tr>
+                    </table>";
                   }
                   ?>
                 </div>

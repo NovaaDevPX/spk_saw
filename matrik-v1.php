@@ -123,7 +123,6 @@ require "include/conn.php";
                     ?>
                   </table>
 
-
                   <!-- ======================= -->
                   <!-- MATRIX TERNORMALISASI R -->
                   <!-- ======================= -->
@@ -141,13 +140,11 @@ require "include/conn.php";
                       <th>C5</th>
                     </tr>
                     <?php
-                    // Ambil atribut dan bobot kriteria
+                    // Ambil atribut dan bobot kriteria (atribut diperlukan)
                     $krit = [];
-                    $bobot = [];
-                    $q = $db->query("SELECT id_criteria, attribute, weight FROM saw_criterias ORDER BY id_criteria");
+                    $q = $db->query("SELECT id_criteria, attribute FROM saw_criterias ORDER BY id_criteria");
                     while ($r = $q->fetch_object()) {
                       $krit[(int)$r->id_criteria] = $r->attribute; // 'benefit' atau 'cost'
-                      $bobot[(int)$r->id_criteria] = (float)$r->weight; // simpan bobot asli 
                     }
                     $q->free();
 
@@ -159,40 +156,70 @@ require "include/conn.php";
                     }
                     $q->free();
 
+                    // Jika tidak ada nilai evaluasi sama sekali -> tampilkan pesan
                     if (empty($values)) {
                       echo "<tr><td colspan='6' class='text-danger text-center'>Belum ada data untuk dinormalisasi.</td></tr>";
+                      // pastikan $R tetap didefinisikan sebagai array kosong agar bagian berikut tidak error
                       $R = [];
                     } else {
+                      // Hitung max & min per kriteria dari array $values
+                      $max = [];
+                      $min = [];
+                      // inisialisasi array per criteria
+                      for ($j = 1; $j <= 5; $j++) {
+                        $col = [];
+                        foreach ($values as $altVals) {
+                          if (isset($altVals[$j])) $col[] = $altVals[$j];
+                        }
+                        // jika kolom kosong (mis. kriteria belum pernah diisi), set default 1 untuk menghindari pembagian nol
+                        if (empty($col)) {
+                          $max[$j] = 1;
+                          $min[$j] = 1;
+                        } else {
+                          $max[$j] = max($col);
+                          $min[$j] = min($col);
+                          // safety: jika max == 0, set ke 1 untuk hindari pembagian 0
+                          if ($max[$j] == 0) $max[$j] = 1;
+                          if ($min[$j] == 0) $min[$j] = 1;
+                        }
+                      }
+
+                      // Untuk setiap alternatif yang ada di $alternatifNama, hitung Rij untuk tiap kriteria
+                      // (tampilkan semua alternatif yang punya nama, meskipun beberapa kriteria kosong)
                       $R = [];
                       foreach ($alternatifNama as $id_alt => $name_alt) {
+                        // jika alternatif tidak punya nilai sama sekali, kita tetap tampilkan tetapi nilai R akan 0
+                        $hasAny = isset($values[$id_alt]) && !empty($values[$id_alt]);
                         $rowR = [];
                         for ($j = 1; $j <= 5; $j++) {
-                          // Ambil nilai & bobot
-                          $xij = isset($values[$id_alt][$j]) ? (float)$values[$id_alt][$j] : null;
-                          $wj = isset($bobot[$j]) ? (float)$bobot[$j] : 0;
+                          $xij = $hasAny && isset($values[$id_alt][$j]) ? (float)$values[$id_alt][$j] : null;
 
                           if ($xij === null) {
+                            // nilai belum diisi untuk kriteria ini -> tampilkan '-' dan simpan 0 di R
                             $rowR[$j] = 0;
                           } else {
-                            // Terapkan rumus baru: (nilai / 5) * (bobot / 100)
-                            $rVal = ($xij / 5) * ($wj / 100);
-
-                            // Jika atribut cost, dibalik (semakin kecil semakin baik)
-                            if (isset($krit[$j]) && $krit[$j] === 'cost') {
-                              $rVal = (1 - ($xij / 5)) * ($wj / 100);
+                            $attr = isset($krit[$j]) ? $krit[$j] : 'benefit'; // default benefit bila tidak ada
+                            if ($attr === 'benefit') {
+                              // formula benefit: Xij / max{Xj}
+                              $rVal = $max[$j] ? ($xij / $max[$j]) : 0;
+                            } else {
+                              // formula cost: min{Xj} / Xij
+                              // hindari pembagian dengan 0
+                              if ($xij == 0) $rVal = 0;
+                              else $rVal = $min[$j] / $xij;
                             }
-
                             $rowR[$j] = $rVal;
                           }
                         }
 
-                        // Simpan hasil normalisasi untuk alternatif ini
+                        // Simpan R untuk alternatif ini (indexing mulai dari 1..5)
                         $R[$id_alt] = [$rowR[1], $rowR[2], $rowR[3], $rowR[4], $rowR[5]];
 
-                        // Tampilkan hasil di tabel
+                        // Tampilkan baris
                         echo "<tr class='center'>";
                         echo "<th>A{$id_alt} {$name_alt}</th>";
                         for ($j = 1; $j <= 5; $j++) {
+                          // jika nilai asli belum ada, tampilkan '-'
                           $display = (isset($values[$id_alt][$j])) ? number_format($R[$id_alt][$j - 1], 2) : '-';
                           echo "<td>{$display}</td>";
                         }
@@ -201,6 +228,8 @@ require "include/conn.php";
                     }
                     ?>
                   </table>
+
+
 
                   <!-- ======================= -->
                   <!-- NILAI AKHIR (P) -->
@@ -213,21 +242,20 @@ require "include/conn.php";
                     </tr>
                     <?php
                     if (!empty($R)) {
-                      // Ambil bobot (tetap diambil agar konsisten, tapi tidak dikalikan lagi)
+                      // Ambil bobot
                       $bobotQuery = $db->query("SELECT id_criteria, weight FROM saw_criterias ORDER BY id_criteria");
                       $W = [];
                       while ($row = $bobotQuery->fetch_object()) {
-                        $W[$row->id_criteria] = (float)$row->weight;
+                        $W[$row->id_criteria] = $row->weight;
                       }
                       $bobotQuery->free();
 
-                      // Hitung nilai akhir
+                      // Hitung nilai akhir dan simpan
                       $nilaiP = [];
                       foreach ($R as $id => $nilaiR) {
                         $V = 0;
                         for ($j = 1; $j <= 5; $j++) {
-                          // Karena bobot sudah diterapkan di R, cukup dijumlahkan saja
-                          $V += $nilaiR[$j - 1];
+                          $V += $nilaiR[$j - 1] * $W[$j];
                         }
                         $nilaiP[$id] = $V;
                       }
@@ -239,19 +267,20 @@ require "include/conn.php";
                         $count2dec[$rounded2][] = $id;
                       }
 
-                      // Tampilkan tabel hasil akhir
+                      // Tampilkan tabel
                       foreach ($nilaiP as $id => $val) {
                         $rounded2 = number_format($val, 2, '.', '');
                         if (count($count2dec[$rounded2]) > 1) {
+                          // Ada duplikat 2 desimal, tampilkan 3 desimal
                           $display = number_format($val, 3, '.', '');
                         } else {
+                          // Unik, tampilkan 2 desimal
                           $display = $rounded2;
                         }
-
                         echo "<tr class='center'>
-              <th>A{$id} {$alternatifNama[$id]}</th>
-              <td>{$display}</td>
-            </tr>\n";
+                <th>A{$id} {$alternatifNama[$id]}</th>
+                <td>{$display}</td>
+              </tr>\n";
                       }
                     } else {
                       echo "<tr><td colspan='2' class='text-danger text-center'>Belum ada hasil perhitungan.</td></tr>";
