@@ -15,17 +15,16 @@ require "include/conn.php";
         $msg = htmlspecialchars($_GET['msg']);
         $type = isset($_GET['type']) ? htmlspecialchars($_GET['type']) : 'info';
 
-        // Tentukan warna alert Bootstrap
         $class = 'alert-info';
         if ($type === 'success') $class = 'alert-success';
         if ($type === 'error') $class = 'alert-danger';
         if ($type === 'warning') $class = 'alert-warning';
 
         echo "
-  <div class='alert {$class} alert-dismissible fade show' role='alert' style='margin:10px 0;'>
-    {$msg}
-    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
-  </div>";
+        <div class='alert {$class} alert-dismissible fade show' role='alert' style='margin:10px 0;'>
+          {$msg}
+          <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+        </div>";
       }
       ?>
 
@@ -96,6 +95,8 @@ require "include/conn.php";
 
                     $X = [1 => [], 2 => [], 3 => [], 4 => [], 5 => []];
                     $alternatifNama = [];
+                    $idMapping = []; // id alternatif ke nomor urut (1,2,3,...)
+                    $noAlt = 1;
 
                     if ($result->num_rows > 0) {
                       while ($row = $result->fetch_object()) {
@@ -104,10 +105,13 @@ require "include/conn.php";
                         $X[3][] = round($row->C3, 2);
                         $X[4][] = round($row->C4, 2);
                         $X[5][] = round($row->C5, 2);
+
+                        // Mapping ID ke urutan
+                        $idMapping[$row->id_alternative] = $noAlt;
                         $alternatifNama[$row->id_alternative] = $row->name;
 
                         echo "<tr class='center'>
-                                <th>A<sub>{$row->id_alternative}</sub> {$row->name}</th>
+                                <th>A{$noAlt} {$row->name}</th>
                                 <td>" . round($row->C1, 2) . "</td>
                                 <td>" . round($row->C2, 2) . "</td>
                                 <td>" . round($row->C3, 2) . "</td>
@@ -115,6 +119,7 @@ require "include/conn.php";
                                 <td>" . round($row->C5, 2) . "</td>
                                 <td><a href='keputusan-hapus.php?id={$row->id_alternative}' class='btn btn-danger btn-sm'>Hapus</a></td>
                               </tr>\n";
+                        $noAlt++;
                       }
                     } else {
                       echo "<tr><td colspan='7' class='text-danger text-center'>Belum ada data evaluasi.</td></tr>";
@@ -122,7 +127,6 @@ require "include/conn.php";
                     $result->free();
                     ?>
                   </table>
-
 
                   <!-- ======================= -->
                   <!-- MATRIX TERNORMALISASI R -->
@@ -141,17 +145,15 @@ require "include/conn.php";
                       <th>C5</th>
                     </tr>
                     <?php
-                    // Ambil atribut dan bobot kriteria
                     $krit = [];
                     $bobot = [];
                     $q = $db->query("SELECT id_criteria, attribute, weight FROM saw_criterias ORDER BY id_criteria");
                     while ($r = $q->fetch_object()) {
-                      $krit[(int)$r->id_criteria] = $r->attribute; // 'benefit' atau 'cost'
-                      $bobot[(int)$r->id_criteria] = (float)$r->weight; // simpan bobot asli 
+                      $krit[(int)$r->id_criteria] = $r->attribute;
+                      $bobot[(int)$r->id_criteria] = (float)$r->weight;
                     }
                     $q->free();
 
-                    // Ambil semua nilai evaluasi ke array values[id_alt][id_crit] = value
                     $values = [];
                     $q = $db->query("SELECT id_alternative, id_criteria, value FROM saw_evaluations");
                     while ($row = $q->fetch_object()) {
@@ -167,31 +169,23 @@ require "include/conn.php";
                       foreach ($alternatifNama as $id_alt => $name_alt) {
                         $rowR = [];
                         for ($j = 1; $j <= 5; $j++) {
-                          // Ambil nilai & bobot
                           $xij = isset($values[$id_alt][$j]) ? (float)$values[$id_alt][$j] : null;
                           $wj = isset($bobot[$j]) ? (float)$bobot[$j] : 0;
 
                           if ($xij === null) {
                             $rowR[$j] = 0;
                           } else {
-                            // Terapkan rumus : (nilai / 5) * (bobot / 100)
                             $rVal = ($xij / 5) * ($wj / 100);
-
-                            // Jika atribut cost, dibalik (semakin kecil semakin baik)
                             if (isset($krit[$j]) && $krit[$j] === 'cost') {
                               $rVal = (1 - ($xij / 5)) * ($wj / 100);
                             }
-
                             $rowR[$j] = $rVal;
                           }
                         }
-
-                        // Simpan hasil normalisasi untuk alternatif ini
                         $R[$id_alt] = [$rowR[1], $rowR[2], $rowR[3], $rowR[4], $rowR[5]];
 
-                        // Tampilkan hasil di tabel
                         echo "<tr class='center'>";
-                        echo "<th>A{$id_alt} {$name_alt}</th>";
+                        echo "<th>A{$idMapping[$id_alt]} {$name_alt}</th>";
                         for ($j = 1; $j <= 5; $j++) {
                           $display = (isset($values[$id_alt][$j])) ? number_format($R[$id_alt][$j - 1], 2) : '-';
                           echo "<td>{$display}</td>";
@@ -213,44 +207,32 @@ require "include/conn.php";
                     </tr>
                     <?php
                     if (!empty($R)) {
-                      // Ambil bobot 
-                      $bobotQuery = $db->query("SELECT id_criteria, weight FROM saw_criterias ORDER BY id_criteria");
-                      $W = [];
-                      while ($row = $bobotQuery->fetch_object()) {
-                        $W[$row->id_criteria] = (float)$row->weight;
-                      }
-                      $bobotQuery->free();
-
-                      // Hitung nilai akhir
                       $nilaiP = [];
                       foreach ($R as $id => $nilaiR) {
-                        $V = 0;
-                        for ($j = 1; $j <= 5; $j++) {
-                          // dijumlahkan 
-                          $V += $nilaiR[$j - 1];
-                        }
-                        $nilaiP[$id] = $V;
+                        $nilaiP[$id] = array_sum($nilaiR);
                       }
 
-                      // Cek nilai yang sama hingga 2 desimal
-                      $count2dec = [];
+                      // Cek apakah ada nilai dengan dua angka di belakang koma yang sama
+                      $duaKoma = [];
                       foreach ($nilaiP as $id => $val) {
-                        $rounded2 = number_format($val, 2, '.', '');
-                        $count2dec[$rounded2][] = $id;
+                        $duaKoma[$id] = number_format($val, 2);
                       }
 
-                      // Tampilkan tabel hasil akhir
+                      // Hitung jumlah kemunculan tiap nilai dua angka di belakang koma
+                      $count = array_count_values($duaKoma);
+
+                      // Tampilkan hasil
                       foreach ($nilaiP as $id => $val) {
-                        $rounded2 = number_format($val, 2, '.', '');
-                        if (count($count2dec[$rounded2]) > 1) {
-                          $display = number_format($val, 3, '.', '');
+                        // Jika ada nilai dengan dua angka di belakang koma yang sama lebih dari 1 → pakai 3 angka di belakang koma
+                        if ($count[$duaKoma[$id]] > 1) {
+                          $formatted = number_format($val, 3);
                         } else {
-                          $display = $rounded2;
+                          $formatted = number_format($val, 2);
                         }
 
                         echo "<tr class='center'>
-              <th>A{$id} {$alternatifNama[$id]}</th>
-              <td>{$display}</td>
+              <th>A{$idMapping[$id]} {$alternatifNama[$id]}</th>
+              <td>{$formatted}</td>
             </tr>\n";
                       }
                     } else {
@@ -258,7 +240,6 @@ require "include/conn.php";
                     }
                     ?>
                   </table>
-
                 </div>
               </div>
             </div>
@@ -277,7 +258,7 @@ require "include/conn.php";
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title" id="myModalLabel33">Isi Nilai Kandidat </h4>
+          <h4 class="modal-title" id="myModalLabel33">Isi Nilai Kandidat</h4>
           <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
             <i data-feather="x"></i>
           </button>
